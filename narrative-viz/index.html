@@ -1,21 +1,63 @@
 <html>
 <script src='https://d3js.org/d3.v5.min.js'></script>
 <style> circle {fill: lightblue; stroke: black;} </style>
-<body onload='init()'>
-<svg width=300 height=300>
-</svg>
+
+<head>
+    <h1 align="center">Car Fuel Efficiency Report</h1>
+    <h3>Car manufacturers compete with each other to build cars targeting different consumer segments.  The fuel efficiency of these cars vary depending on number of factors.
+        In this report we will look into some of the popular parameters such as the number of engine cylinders, fuel type, highway/city usage.  </h3>
+</head>
+
+<body onload="init()" >
+<div>
+    <button name="Home" class="button" onclick="init()">Overview</button>
+    <button name="Home" class="button" onclick="showEngineCylinders()">Engine Cylinders</button>
+    <button name="Home" class="button" onclick="">Fuel Type</button>
+</div>
+<div>
+    <label for="EngineCylinders" style="display:none;" id="EngineCylindersLabel">Choose Engine Cylinder # :</label>
+    <select name="EngineCylinders" style="display:none;" id="EngineCylinders" onchange="engineCylinders(this.value)">
+        <option value="-1">--</option>
+        <option value="0">0</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="6">6</option>
+        <option value="8">8</option>
+        <option value="10">10</option>
+        <option value="12">12</option>
+    </select>
+</div>
+<div>
+    <svg id="overviewCanvas" display="none" width=600 height=600></svg>
+</div>
+<div>
+    <svg id="cylinderCanvas" display="none" width=600 height=600></svg>
+</div>
+<div>
+    <svg id="fuelTypeCanvas" display="none" width=600 height=600></svg>
+</div>
+
 <script>
 async function init() {
-	var width = 200
-	var height = 200
+    hideEngineCylinders()
+    var canvas = document.getElementById("overviewCanvas");
+    canvas.style.display = "block";
+	var width = 500
+	var height = 500
 	data = await d3.csv("https://flunky.github.io/cars2017.csv");
-	var x = d3.scaleLog().domain([10,150]).range([0,width])
-	var y = d3.scaleLog().domain([10,150]).range([height,0])
-	var xAxis = d3.axisBottom(x).tickValues([10, 20, 50, 100]).tickFormat((d, i) => [10, 20, 50, 100][i]);
-	var yAxis = d3.axisLeft(y).tickValues([10, 20, 50, 100]).tickFormat((d, i) => [10, 20, 50, 100][i]);
-	var margin = 50
+	var x = d3.scaleLog().domain([10,200]).range([0,width])
+	var y = d3.scaleLog().domain([10,200]).range([height,0])
+	var color = d3.scaleOrdinal().domain(["Gasoline", "Diesel", "Electricity"]).range(["Green", "Red", "Blue"])
+	var tooltip = d3.select("body").append("div").attr("class", "tooltip");
 
-	var svg = d3.select("svg")
+	var xAxis = d3.axisBottom(x).tickValues([10, 20, 50, 100, 150, 200]).tickFormat((d, i) => [10, 20, 50, 100, 150, 200][i]);
+	var yAxis = d3.axisLeft(y).tickValues([10, 20, 50, 100, 150, 200]).tickFormat((d, i) => [10, 20, 50, 100, 150, 200][i]);
+	var margin = 50
+	var xLabel = "Average City MPG"
+	var yLabel = "Average Highway MPG"
+
+	var svg = d3.select("#overviewCanvas")
 	svg.append("g")
 		.attr("transform", "translate(" + margin + "," + margin + ")")
 		.selectAll("circle")
@@ -24,7 +66,73 @@ async function init() {
 		.append("circle")
 			.attr("cx", function(d) {return x(d.AverageCityMPG);})
 			.attr("cy", function(d) {return y(d.AverageHighwayMPG);})
-			.attr("r",function(d) {return 2+parseInt(d.EngineCylinders);})	
+			.attr("r",function(d) {return 2+parseInt(d.EngineCylinders);})
+			.attr("fill", function(d) {return color(d.Fuel);})
+			.on("mouseover", function(d) {return tooltip.style("visibility", "visible").text('# of Cylinders = ' + d.EngineCylinders
+			+ '\nAverageCityMPG  = ' + d.AverageCityMPG +'\nAverageHighwayMPG = ' + d.AverageHighwayMPG);})
+
+	svg.append("g")
+		.attr("transform", "translate(" + margin + "," + margin + ")")
+		.call(yAxis);
+
+	svg.append("g")
+		.attr("transform", "translate(" + margin + "," + (height + margin) + ")")
+        .call(xAxis);
+}
+
+function showEngineCylinders(cylinders) {
+   var x = document.getElementById("EngineCylinders");
+   x.style.display = "block";
+   var y = document.getElementById("EngineCylindersLabel");
+   y.style.display = "block";
+   var canvas = document.getElementById("overviewCanvas");
+   canvas.style.display = "none";
+}
+
+function hideEngineCylinders(){
+   var x = document.getElementById("EngineCylinders");
+   x.style.display = "none";
+   var y = document.getElementById("EngineCylindersLabel");
+   y.style.display = "none";
+   var canvas = document.getElementById("cylinderCanvas");
+   canvas.style.display = "none";
+}
+
+async function engineCylinders(cylinders) {
+    console.log("engine cylinders fn")
+    var canvas = document.getElementById("cylinderCanvas");
+    canvas.style.display = "block";
+	var width = 500
+	var height = 500
+	data = await d3.csv("https://flunky.github.io/cars2017.csv");
+	var x = d3.scaleLog().domain([10,200]).range([0,width])
+	var y = d3.scaleLog().domain([10,200]).range([height,0])
+	var xAxis = d3.axisBottom(x).tickValues([10, 20, 50, 100, 150, 200]).tickFormat((d, i) => [10, 20, 50, 100, 150, 200][i]);
+	var yAxis = d3.axisLeft(y).tickValues([10, 20, 50, 100, 150, 200]).tickFormat((d, i) => [10, 20, 50, 100, 150, 200][i]);
+	var margin = 50
+	var dataByCylinder = data.filter(function(d)
+	{
+        if(d["EngineCylinders"] == cylinders)
+        {
+            return d;
+        }
+
+    })
+
+	var svg = d3.select("#cylinderCanvas")
+	svg.html = ""
+    svg.append("g")
+    .attr("transform", "translate(" + margin + "," + margin + ")")
+    .selectAll("circle")
+    .data(dataByCylinder)
+    .enter()
+    .append("circle")
+			.attr("cx", function(d) {return x(d.AverageCityMPG);})
+			.attr("cy", function(d) {return y(d.AverageHighwayMPG);})
+			.attr("r",function(d) {return 2+parseInt(d.EngineCylinders);})
+			.on("mouseover", function(d) {return tooltip.style("visibility", "visible").text('# of Cylinders = ' + d.EngineCylinders
+			+ '\nAverageCityMPG  = ' + d.AverageCityMPG +'\nAverageHighwayMPG = ' + d.AverageHighwayMPG);})
+
 	svg.append("g")
 		.attr("transform", "translate(" + margin + "," + margin + ")")
 		.call(yAxis);
@@ -32,6 +140,31 @@ async function init() {
 		.attr("transform", "translate(" + margin + "," + (height + margin) + ")")
 		.call(xAxis);
 }
+
 </script>
+<style>
+div.tooltip {
+    position: absolute;
+    text-align: left;
+    width: 160px;
+    height: 50px;
+    padding: 2px;
+    font: 12px sans-serif;
+    border: 0px;
+    border-radius: 8px;
+    pointer-events: none;
+}
+
+.button {
+  background-color: #6495ED;
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+}
+</style>
 </body>
 </html>
