@@ -71,9 +71,9 @@ async function init() {
 			.attr("r",function(d) {return 2+parseInt(d.EngineCylinders);})
 			.attr("fill", function(d) {return color(d.Fuel);})
 			.on("mouseover", function(d) {return tooltip.style("opacity",1)
-			.style("left", d3.select(this).attr("cx")+"px")
-			.style("right", d3.select(this).attr("cx")+"px")
-			.text('# of Cylinders = ' + d.EngineCylinders
+			.style("left", (d3.event.pageX)+"px")
+			.style("top", (d3.event.pageY)+"px")
+			.html('# of Cylinders = ' + d.EngineCylinders
 			+ '\nAverageCityMPG  = ' + d.AverageCityMPG +'\nAverageHighwayMPG = ' + d.AverageHighwayMPG);})
 			.on("mouseout", function(){tooltip.style("opacity",0);})
 
@@ -125,7 +125,6 @@ async function engineCylinders(cylinders) {
     })
 	var tooltip = d3.select("#tooltip");
 	var svg = d3.select("#cylinderCanvas")
-	svg.html = ""
     svg.append("g")
     .attr("transform", "translate(" + margin + "," + margin + ")")
     .selectAll("circle")
@@ -136,9 +135,9 @@ async function engineCylinders(cylinders) {
 			.attr("cy", function(d) {return y(d.AverageHighwayMPG);})
 			.attr("r",function(d) {return 2+parseInt(d.EngineCylinders);})
 			.on("mouseover", function(d) {return tooltip.style("opacity",1)
-			.style("left", d3.select(this).attr("cx")+"px")
-			.style("right", d3.select(this).attr("cx")+"px")
-			.text('# of Cylinders = ' + d.EngineCylinders
+			.style("left", (d3.event.pageX)+"px")
+			.style("top", (d3.event.pageY)+"px")
+			.html('# of Cylinders = ' + d.EngineCylinders
 			+ '\nAverageCityMPG  = ' + d.AverageCityMPG +'\nAverageHighwayMPG = ' + d.AverageHighwayMPG);})
 			.on("mouseout", function(){tooltip.style("opacity",0);})
 
@@ -152,9 +151,10 @@ async function engineCylinders(cylinders) {
 
 </script>
 <style>
-div.tooltip {
+.tooltip {
     opacity: 0;
     position: absolute;
+    background-color: lightgreen;
     text-align: left;
     width: 160px;
     height: 50px;
